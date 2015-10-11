@@ -28,7 +28,7 @@ ref <- function(object = NULL, constraint = NULL) {
   }
   e <- new.env(FALSE, parent.frame(), 4L)
   list2env(list(object = object, constraint = constraint), e)
-  lockEnvironment(e)
+  lockEnvironment(e, bindings = TRUE)
   class(e) <- "ref"
   e
 }
@@ -41,7 +41,7 @@ ref <- function(object = NULL, constraint = NULL) {
 #' deref(ref1)
 deref <- function(x) {
   if (inherits(x, "ref")) {
-    get("object", envir = x, inherits = FALSE)
+    get("object", x, inherits = FALSE)
   } else x
 }
 
@@ -53,7 +53,7 @@ constraint <- function(x)
 
 #' @export
 constraint.ref <- function(x) {
-  get("constraint", envir = x, inherits = FALSE)
+  get("constraint", x, inherits = FALSE)
 }
 
 validate <- function(x, object) {
@@ -67,6 +67,7 @@ print.ref <- function(x, ...) {
   cat(sprintf("<ref: %s>\n", paste0(class(object), collapse = ", ")))
   cat(format.default(x), "\n")
   if (!is.null(object)) print(object, ...)
+  invisible(x)
 }
 
 #' Update the value in ref object
@@ -87,8 +88,11 @@ print.ref <- function(x, ...) {
 #' # of the constraint.
 #' # update(ref2, rnorm(20))
 update.ref <- function(object, value, ...) {
-  if (!validate(object, value)) stop("ref constraint is violated by supplied value")
-  assign("object", value, envir = object, inherits = FALSE)
+  if (!validate(object, value)) 
+    stop("ref constraint is violated by supplied value")
+  unlockBinding(quote(object), object)
+  assign("object", value, object, inherits = FALSE)
+  lockBinding(quote(object), object)
   invisible(object)
 }
 
