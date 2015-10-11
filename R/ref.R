@@ -26,10 +26,12 @@ ref <- function(object = NULL, constraint = NULL) {
   if (!is.null(constraint) && !constraint(object)) {
     stop("constraint is violated by initial value")
   }
-  constraint_expr <- substitute(constraint)
-  object; constraint; constraint_expr;
-  lockEnvironment(environment())
-  structure(environment(), class = "ref")
+  e <- new.env(FALSE, parent.frame(), 4L)
+  list2env(list(object = object, constraint = constraint,
+    constraint_expr = substitute(constraint),
+    address = sub("<environment: (.*)>", "\\1", format.default(e))), e)
+  lockEnvironment(e)
+  structure(e, class = "ref")
 }
 
 #' Extract the value of a ref object
@@ -63,7 +65,8 @@ validate <- function(x, object) {
 #' @export
 print.ref <- function(x, ...) {
   object <- deref(x)
-  cat(sprintf("<ref: %s>\n", paste0(class(object), collapse = ", ")))
+  address <- get("address", envir = x, inherits = FALSE)
+  cat(sprintf("<ref: %s @ %s>\n", paste0(class(object), collapse = ", "), address))
   constraint_expr <- get("constraint_expr", envir = x, inherits = FALSE)
   if (!is.null(constraint_expr)) {
     cat(sprintf("<constraint: %s>\n",
