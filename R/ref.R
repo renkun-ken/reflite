@@ -75,9 +75,11 @@ length.ref <- function(x) length(deref(x))
 }
 
 #' @export
+#' @importFrom utils head
 head.ref <- function(x, ...) NextMethod("head", deref(x), ...)
 
 #' @export
+#' @importFrom utils tail
 tail.ref <- function(x, ...) NextMethod("tail", deref(x), ...)
 
 validate <- function(x, object) {
