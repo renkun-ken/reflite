@@ -26,10 +26,9 @@ ref <- function(object = NULL, constraint = NULL) {
   if (!is.null(constraint) && !constraint(object)) {
     stop("constraint is violated by initial value")
   }
-  e <- new.env(FALSE, parent.frame(), 4L)
-  list2env(list(object = object, constraint = constraint), e)
+  e <- new.env(FALSE, parent.frame(), 0L)
+  attributes(e) <- list(class = "ref", object = object, constraint = constraint)
   lockEnvironment(e, bindings = TRUE)
-  class(e) <- "ref"
   e
 }
 
@@ -41,7 +40,7 @@ ref <- function(object = NULL, constraint = NULL) {
 #' deref(ref1)
 deref <- function(x) {
   if (inherits(x, "ref")) {
-    get("object", x, inherits = FALSE)
+    attr(x, "object", TRUE)
   } else x
 }
 
@@ -53,8 +52,33 @@ constraint <- function(x)
 
 #' @export
 constraint.ref <- function(x) {
-  get("constraint", x, inherits = FALSE)
+  attr(x, "constraint", TRUE)
 }
+
+#' @export
+with.ref <- function(data, expr, ...) {
+  object <- deref(data)
+  eval(substitute(expr), if (is.list(object)) object else NULL, data)
+}
+
+#' @export
+within.ref <- with.ref
+
+#' @export
+length.ref <- function(x) length(deref(x))
+
+#' @export
+`length<-.ref` <- function(x, value) {
+  object <- deref(x)
+  length(object) <- value
+  update.ref(x, object)
+}
+
+#' @export
+head.ref <- function(x, ...) NextMethod("head", deref(x), ...)
+
+#' @export
+tail.ref <- function(x, ...) NextMethod("tail", deref(x), ...)
 
 validate <- function(x, object) {
   constraint <- constraint.ref(x)
@@ -89,10 +113,8 @@ print.ref <- function(x, ...) {
 #' # update(ref2, rnorm(20))
 update.ref <- function(object, value, ...) {
   if (!validate(object, value)) 
-    stop("ref constraint is violated by supplied value")
-  unlockBinding(quote(object), object)
-  assign("object", value, object, inherits = FALSE)
-  lockBinding(quote(object), object)
+    stop("ref constraint is violated by supplied value", call. = FALSE)
+  attr(object, "object") <- value
   invisible(object)
 }
 
