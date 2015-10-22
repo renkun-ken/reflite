@@ -64,15 +64,30 @@ with.ref <- function(data, expr, ...) {
 #' @export
 within.ref <- with.ref
 
+fupdate <- function(f) {
+  function(x, value) {
+    obj <- deref(x)
+    update.ref(x, f(obj, value))
+  }
+}
+
 #' @export
 length.ref <- function(x) length(deref(x))
 
 #' @export
-`length<-.ref` <- function(x, value) {
-  object <- deref(x)
-  length(object) <- value
-  update.ref(x, object)
-}
+`length<-.ref` <- function(x, value) fupdate(`length<-`)
+
+#' @export
+names.ref <- function(x) names(deref(x))
+
+#' @export
+`names<-.ref` <- fupdate(`names<-`)
+
+#' @export
+rownames.ref <- function(x) rownames(deref(x))
+
+#' @export
+`row.names<-.ref` <- fupdate(`rownames<-`)
 
 #' @export
 #' @importFrom utils head
