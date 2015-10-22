@@ -75,7 +75,7 @@ fupdate <- function(f) {
 length.ref <- function(x) length(deref(x))
 
 #' @export
-`length<-.ref` <- function(x, value) fupdate(`length<-`)
+`length<-.ref` <- fupdate(`length<-`)
 
 #' @export
 names.ref <- function(x) names(deref(x))
