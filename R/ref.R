@@ -61,9 +61,6 @@ with.ref <- function(data, expr, ...) {
   eval(substitute(expr), if (is.list(object)) object else NULL, data)
 }
 
-#' @export
-within.ref <- with.ref
-
 fupdate <- function(f) {
   function(x, value) {
     obj <- deref(x)
@@ -84,7 +81,7 @@ names.ref <- function(x) names(deref(x))
 `names<-.ref` <- fupdate(`names<-`)
 
 #' @export
-rownames.ref <- function(x) rownames(deref(x))
+row.names.ref <- function(x) rownames(deref(x))
 
 #' @export
 `row.names<-.ref` <- fupdate(`rownames<-`)
@@ -96,6 +93,34 @@ head.ref <- function(x, ...) NextMethod("head", deref(x), ...)
 #' @export
 #' @importFrom utils tail
 tail.ref <- function(x, ...) NextMethod("tail", deref(x), ...)
+
+#' @export
+as.numeric.ref <- function(x, ...) as.numeric(deref(x), ...)
+
+#' @export
+as.integer.ref <- function(x, ...) as.integer(deref(x), ...)
+
+#' @export
+as.character.ref <- function(x, ...) as.character(deref(x), ...)
+
+#' @export
+as.list.ref <- function(x, ...) as.list(deref(x), ...)
+
+#' @export
+as.complex.ref <- function(x, ...) as.complex(deref(x), ...)
+
+#' @export
+as.raw.ref <- function(x) as.raw(deref(x))
+
+#' @export
+as.data.frame.ref <- function(x, ...) as.data.frame(deref(x), ...)
+
+#' @export
+as.matrix.ref <- function(x, ...) as.matrix(deref(x), ...)
+
+#' @export
+as.array.ref <- function(x, ...) as.array(deref(x), ...)
+
 
 validate <- function(x, object) {
   constraint <- constraint.ref(x)
@@ -200,3 +225,4 @@ create_set_method <- function(f) {
 
 #' @export
 `$<-.ref` <- create_set_method(quote(`$<-`))
+

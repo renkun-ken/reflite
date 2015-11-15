@@ -16,4 +16,4 @@ URL: https://github.com/renkun-ken/reflite
 BugReports: https://github.com/renkun-ken/reflite/issues
 Roxygen: list(wrap = FALSE)
 ByteCompile: TRUE
-RoxygenNote: 5.0.0
+RoxygenNote: 5.0.1
